@@ -1,0 +1,455 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Grilla de Canales MUNDO</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Montserrat', sans-serif;
+            background-color: #f8fafc;
+            color: #1e293b;
+        }
+
+        /* Colores Corporativos */
+        .text-mundo { color: #0046ad; }
+        .bg-mundo { background-color: #0046ad; }
+        .border-mundo { border-color: #0046ad; }
+        .text-cyan-mundo { color: #00d1ff; }
+
+        /* Tarjeta de Canal */
+        .channel-card {
+            background: white;
+            border: 1px solid #e2e8f0;
+            border-radius: 12px;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: space-between;
+            padding: 16px;
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+            height: 100%;
+        }
+        
+        .channel-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 12px 24px -8px rgba(0, 70, 173, 0.15);
+            border-color: #0046ad;
+        }
+
+        .channel-number {
+            background-color: #0046ad;
+            color: white;
+            font-size: 1.25rem;
+            font-weight: 800;
+            width: 50px;
+            height: 50px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            margin-bottom: 12px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        }
+
+        .channel-name {
+            font-size: 0.95rem;
+            font-weight: 700;
+            text-align: center;
+            line-height: 1.3;
+            color: #334155;
+            text-transform: uppercase;
+            margin-bottom: 8px;
+        }
+
+        .category-badge {
+            font-size: 0.65rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: #64748b;
+            background-color: #f1f5f9;
+            padding: 4px 10px;
+            border-radius: 9999px;
+            white-space: nowrap;
+            max-width: 100%;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        /* Scrollbar oculto para filtros */
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+
+        .filter-btn {
+            white-space: nowrap;
+            padding: 8px 16px;
+            border-radius: 99px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            border: 1px solid #e2e8f0;
+            background-color: white;
+            color: #64748b;
+            transition: all 0.2s;
+        }
+        
+        .filter-btn.active {
+            background-color: #0046ad;
+            color: white;
+            border-color: #0046ad;
+        }
+    </style>
+</head>
+<body class="bg-slate-50 min-h-screen flex flex-col">
+
+    <!-- Navegación -->
+    <nav class="bg-white border-b border-gray-200 sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-4 h-20 flex items-center justify-between">
+            <div class="text-3xl font-extrabold text-mundo">
+                MUNDO<span class="text-cyan-mundo">.</span>
+            </div>
+            <div class="hidden sm:block text-xs font-bold text-gray-400 uppercase tracking-widest">
+                Grilla Digital (1 - 268)
+            </div>
+        </div>
+    </nav>
+
+    <!-- Header y Buscador -->
+    <header class="bg-white pb-8 pt-8 px-4 text-center shadow-sm">
+        <h1 class="text-3xl font-black text-slate-800 mb-6">ENCUENTRA TU CANAL</h1>
+        
+        <div class="relative max-w-xl mx-auto">
+            <input type="text" id="searchInput" placeholder="Buscar por nombre (ej: Mega) o número (ej: 246)..." 
+                class="w-full pl-12 pr-4 py-4 rounded-xl border border-gray-200 text-lg focus:outline-none focus:ring-2 focus:ring-blue-600 focus:border-transparent transition-shadow shadow-sm">
+            <div class="absolute left-4 top-4 text-gray-400">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                </svg>
+            </div>
+        </div>
+    </header>
+
+    <!-- Barra de Filtros -->
+    <div class="bg-white border-b border-gray-200 sticky top-20 z-40 shadow-sm">
+        <div class="max-w-7xl mx-auto px-4 py-3 overflow-x-auto no-scrollbar">
+            <div class="flex space-x-2 min-w-max">
+                <button class="filter-btn active" onclick="filter('Todos', this)">Todos</button>
+                <button class="filter-btn" onclick="filter('Nacionales', this)">Nacionales</button>
+                <button class="filter-btn" onclick="filter('Infantil', this)">Infantiles</button>
+                <button class="filter-btn" onclick="filter('Variedades', this)">Variedades/Series</button>
+                <button class="filter-btn" onclick="filter('Cine', this)">Cine</button>
+                <button class="filter-btn" onclick="filter('Noticias', this)">Noticias</button>
+                <button class="filter-btn" onclick="filter('Música', this)">Música</button>
+                <button class="filter-btn" onclick="filter('Estilo', this)">Estilo de Vida</button>
+                <button class="filter-btn" onclick="filter('Cultura', this)">Cultura/Int.</button>
+                <button class="filter-btn" onclick="filter('Educación', this)">Educación</button>
+                <button class="filter-btn" onclick="filter('Deportes', this)">Deportes</button>
+                <button class="filter-btn" onclick="filter('Regionales', this)">Regionales</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Contenedor Grilla -->
+    <main class="flex-grow max-w-7xl mx-auto px-4 py-10 w-full">
+        <div id="grid" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4">
+            <!-- Renderizado JS -->
+        </div>
+        
+        <!-- Estado Vacío -->
+        <div id="noResults" class="hidden text-center py-20">
+            <div class="text-6xl mb-4">📺</div>
+            <h3 class="text-xl font-bold text-gray-400">No encontramos ese canal</h3>
+            <button onclick="resetSearch()" class="mt-4 text-blue-600 font-bold hover:underline">Ver todos</button>
+        </div>
+    </main>
+
+    <footer class="bg-white border-t border-gray-200 py-10 text-center">
+        <p class="text-gray-400 text-xs font-bold uppercase tracking-widest">
+            &copy; 2026 Mundo Telecomunicaciones
+        </p>
+    </footer>
+
+    <script>
+        // BASE DE DATOS EXACTA SEGÚN TU LISTA
+        const channels = [
+            // Nacionales y Abiertos (1-28)
+            { n: 1, t: "Mundo TV", c: "Nacionales" },
+            { n: 2, t: "Mega", c: "Nacionales" },
+            { n: 3, t: "Chilevisión", c: "Nacionales" },
+            { n: 4, t: "TVN", c: "Nacionales" },
+            { n: 5, t: "Canal 13", c: "Nacionales" },
+            { n: 6, t: "REC TV", c: "Nacionales" },
+            { n: 7, t: "13 Cable", c: "Nacionales" },
+            { n: 8, t: "La Red", c: "Nacionales" },
+            { n: 9, t: "TV+", c: "Nacionales" },
+            { n: 10, t: "Canal 9", c: "Nacionales" },
+            { n: 11, t: "TVU", c: "Nacionales" },
+            { n: 23, t: "Click TV", c: "Nacionales" },
+            { n: 24, t: "Exprezión TV", c: "Nacionales" },
+            { n: 25, t: "RDO", c: "Nacionales" },
+            { n: 26, t: "Concepción TV", c: "Nacionales" },
+            { n: 28, t: "Disney Junior", c: "Infantil" }, // Movido a Infantil por lógica
+
+            // Infantiles (29-41)
+            { n: 29, t: "Nick Junior", c: "Infantil" },
+            { n: 30, t: "Clan", c: "Infantil" },
+            { n: 31, t: "Cartoonito", c: "Infantil" },
+            { n: 32, t: "Discovery Kids", c: "Infantil" },
+            { n: 33, t: "Canal Infantil", c: "Infantil" },
+            { n: 35, t: "Zoo Moo", c: "Infantil" },
+            { n: 36, t: "Tooncast", c: "Infantil" },
+            { n: 37, t: "NTV", c: "Infantil" },
+            { n: 38, t: "Funbox", c: "Infantil" },
+            { n: 39, t: "Cartoon Network", c: "Infantil" },
+            { n: 40, t: "Nick", c: "Infantil" },
+            { n: 41, t: "Disney Channel", c: "Infantil" },
+
+            // Variedades (42-76)
+            { n: 42, t: "ETC TV", c: "Variedades" },
+            { n: 50, t: "Mega 2", c: "Variedades" },
+            { n: 51, t: "Tlnovelas", c: "Variedades" },
+            { n: 52, t: "Comedy Central", c: "Variedades" },
+            { n: 53, t: "TBS", c: "Variedades" },
+            { n: 54, t: "Santiago TV", c: "Variedades" },
+            { n: 55, t: "TVR", c: "Variedades" },
+            { n: 56, t: "Corazón", c: "Variedades" },
+            { n: 57, t: "Kanal D", c: "Variedades" },
+            { n: 58, t: "Novelísima", c: "Variedades" },
+            { n: 59, t: "Ve Plus", c: "Variedades" },
+            { n: 68, t: "TNT", c: "Variedades" },
+            { n: 69, t: "Space", c: "Variedades" },
+            { n: 70, t: "TNT Series", c: "Variedades" },
+            { n: 71, t: "Sony Channel", c: "Variedades" },
+            { n: 72, t: "AXN", c: "Variedades" },
+            { n: 73, t: "TCM", c: "Variedades" },
+            { n: 74, t: "De Película", c: "Variedades" },
+            { n: 75, t: "AMC", c: "Variedades" },
+            { n: 76, t: "Paramount", c: "Variedades" },
+
+            // Cine (77-89)
+            { n: 77, t: "Golden Plus", c: "Cine" },
+            { n: 78, t: "Sony Movies", c: "Cine" },
+            { n: 79, t: "Cinema", c: "Cine" },
+            { n: 80, t: "A3 Cine", c: "Cine" },
+            { n: 81, t: "A3Series", c: "Cine" },
+            { n: 82, t: "Cine Familiar", c: "Cine" },
+            { n: 83, t: "Cine Hispano", c: "Cine" },
+            { n: 84, t: "Europa Europa", c: "Cine" },
+            { n: 85, t: "Cine Premium", c: "Cine" },
+            { n: 86, t: "Film&Arts", c: "Cine" },
+            { n: 87, t: "DHE", c: "Cine" },
+            { n: 88, t: "A&E", c: "Cine" },
+            { n: 89, t: "Lifetime", c: "Cine" },
+
+            // Noticias (98-113)
+            { n: 98, t: "24 Horas", c: "Noticias" },
+            { n: 99, t: "CNN Chile", c: "Noticias" },
+            { n: 100, t: "CNN Español", c: "Noticias" },
+            { n: 101, t: "CNN Int.", c: "Noticias" },
+            { n: 102, t: "T13 En Vivo", c: "Noticias" },
+            { n: 103, t: "Bío Bío TV", c: "Noticias" },
+            { n: 104, t: "Diputados TV", c: "Noticias" },
+            { n: 105, t: "TV Senado", c: "Noticias" },
+            { n: 106, t: "Canal 26", c: "Noticias" },
+            { n: 107, t: "UCL", c: "Noticias" },
+            { n: 108, t: "France Monde", c: "Noticias" },
+            { n: 109, t: "RT", c: "Noticias" },
+            { n: 110, t: "CGTN", c: "Noticias" },
+            { n: 111, t: "Fox News", c: "Noticias" },
+            { n: 112, t: "Meganoticias Ahora", c: "Noticias" },
+            { n: 113, t: "CHV Noticias", c: "Noticias" },
+
+            // Música (117-124)
+            { n: 117, t: "Ecool", c: "Música" },
+            { n: 118, t: "HTV", c: "Música" },
+            { n: 119, t: "Bandamax", c: "Música" },
+            { n: 120, t: "Mi Música Hits", c: "Música" },
+            { n: 121, t: "MTV", c: "Música" },
+            { n: 122, t: "Clic", c: "Música" },
+            { n: 123, t: "Quiero Música", c: "Música" },
+            { n: 124, t: "Mi Música K-Pop", c: "Música" },
+
+            // Estilo de Vida (133-143)
+            { n: 133, t: "Discovery H&H", c: "Estilo" },
+            { n: 134, t: "Goza TV", c: "Estilo" },
+            { n: 135, t: "TLC Discovery", c: "Estilo" },
+            { n: 136, t: "El Gourmet", c: "Estilo" },
+            { n: 137, t: "Food Network", c: "Estilo" },
+            { n: 138, t: "Univisión", c: "Estilo" },
+            { n: 139, t: "Adult Swim", c: "Estilo" },
+            { n: 140, t: "AMC Series", c: "Estilo" },
+            { n: 141, t: "Hola TV", c: "Estilo" },
+            { n: 142, t: "Megatiempo", c: "Estilo" },
+            { n: 143, t: "Azteca Int.", c: "Estilo" },
+
+            // Internacionales y Cultura (144-174)
+            { n: 144, t: "Tevex", c: "Cultura" },
+            { n: 145, t: "Magellan TV", c: "Cultura" },
+            { n: 153, t: "Canal Estrellas", c: "Cultura" },
+            { n: 154, t: "Antena 3", c: "Cultura" },
+            { n: 155, t: "DW", c: "Cultura" },
+            { n: 156, t: "El Trece", c: "Cultura" },
+            { n: 157, t: "TV Pública", c: "Cultura" },
+            { n: 158, t: "Telefe", c: "Cultura" },
+            { n: 167, t: "Discovery", c: "Cultura" },
+            { n: 168, t: "ID Discovery", c: "Cultura" },
+            { n: 169, t: "Love Nature", c: "Cultura" },
+            { n: 170, t: "Animal Planet", c: "Cultura" },
+            { n: 171, t: "History", c: "Cultura" },
+            { n: 172, t: "Puntaje Nacional", c: "Cultura" },
+            { n: 173, t: "Vitalidad TV", c: "Cultura" },
+            { n: 174, t: "Discovery Theater", c: "Cultura" },
+
+            // Educación (175-188)
+            { n: 175, t: "Aprendo Libre", c: "Educación" },
+            { n: 176, t: "Mundo Educativo", c: "Educación" },
+            { n: 177, t: "Discovery World", c: "Educación" },
+            { n: 178, t: "HGTV", c: "Educación" },
+            { n: 179, t: "Discovery Science", c: "Educación" },
+            { n: 180, t: "History 2", c: "Educación" },
+            { n: 181, t: "In Trouble", c: "Educación" },
+            { n: 182, t: "In Wonder", c: "Educación" },
+            { n: 183, t: "In Fast", c: "Educación" },
+            { n: 186, t: "Gracia TV", c: "Educación" },
+            { n: 187, t: "Nuevo Tiempo", c: "Educación" },
+            { n: 188, t: "EWTN", c: "Educación" },
+
+            // Deportes (193-213)
+            { n: 193, t: "ESPN", c: "Deportes" },
+            { n: 194, t: "ESPN 2", c: "Deportes" },
+            { n: 195, t: "ESPN 3", c: "Deportes" },
+            { n: 197, t: "ESPN 4", c: "Deportes" },
+            { n: 198, t: "Discovery Turbo", c: "Deportes" },
+            { n: 199, t: "CDO", c: "Deportes" },
+            { n: 200, t: "America Sports", c: "Deportes" },
+            { n: 201, t: "Teletrak", c: "Deportes" },
+            { n: 202, t: "Golf Channel", c: "Deportes" },
+            { n: 203, t: "TyC Sports", c: "Deportes" },
+            { n: 204, t: "Nexoplay", c: "Deportes" },
+            { n: 205, t: "CDO 2", c: "Deportes" },
+            { n: 213, t: "TNT Sports Basic", c: "Deportes" },
+
+            // Regionales (222-268)
+            { n: 222, t: "Plaza TV", c: "Regionales" },
+            { n: 224, t: "TV Costa", c: "Regionales" },
+            { n: 225, t: "Cultura Online", c: "Regionales" },
+            { n: 226, t: "Emoción TV", c: "Regionales" },
+            { n: 227, t: "Buin Somos Todos", c: "Regionales" },
+            { n: 228, t: "Pintana TV", c: "Regionales" },
+            { n: 229, t: "Enlace", c: "Regionales" },
+            { n: 230, t: "Campo Abierto", c: "Regionales" },
+            { n: 231, t: "GTV", c: "Regionales" },
+            { n: 232, t: "Pichilemu TV", c: "Regionales" },
+            { n: 233, t: "Ekiz TV", c: "Regionales" },
+            { n: 234, t: "Sexta Visión", c: "Regionales" },
+            { n: 235, t: "El Tipógrafo", c: "Regionales" },
+            { n: 236, t: "Molina TV", c: "Regionales" },
+            { n: 237, t: "Juntos TV", c: "Regionales" },
+            { n: 238, t: "Campus TV", c: "Regionales" },
+            { n: 240, t: "Telecanal S.Cruz", c: "Regionales" },
+            { n: 241, t: "TV5 Linares", c: "Regionales" },
+            { n: 242, t: "Vivo TV", c: "Regionales" },
+            { n: 243, t: "UTV S.Clemente", c: "Regionales" },
+            { n: 244, t: "Nueva Región", c: "Regionales" },
+            { n: 245, t: "Canal 21", c: "Regionales" },
+            { n: 246, t: "Mi Radio / S.Carlos", c: "Regionales" },
+            { n: 247, t: "Telecauquenes", c: "Regionales" },
+            { n: 248, t: "Más TV", c: "Regionales" },
+            { n: 249, t: "Ziza TV", c: "Regionales" },
+            { n: 250, t: "Pacífico TV", c: "Regionales" },
+            { n: 251, t: "Zonal TV", c: "Regionales" },
+            { n: 252, t: "TV4 De Lota", c: "Regionales" },
+            { n: 253, t: "Gvisión", c: "Regionales" },
+            { n: 254, t: "Club TV", c: "Regionales" },
+            { n: 255, t: "Odisea TV", c: "Regionales" },
+            { n: 256, t: "S. Barbara TV", c: "Regionales" },
+            { n: 257, t: "Curanilahue TV", c: "Regionales" },
+            { n: 258, t: "NCC Tomé", c: "Regionales" },
+            { n: 259, t: "Dinámica TV", c: "Regionales" },
+            { n: 260, t: "Nortevisión", c: "Regionales" },
+            { n: 261, t: "Canal 8", c: "Regionales" },
+            { n: 262, t: "TV5 Angol", c: "Regionales" },
+            { n: 263, t: "Marga Marga TV", c: "Regionales" },
+            { n: 264, t: "Voz Populi", c: "Regionales" },
+            { n: 265, t: "UATV", c: "Regionales" },
+            { n: 266, t: "Mundos Lacustres", c: "Regionales" },
+            { n: 267, t: "Cool TV", c: "Regionales" },
+            { n: 268, t: "Central Noticias", c: "Regionales" }
+        ];
+
+        // Ordenar numéricamente (aunque ya vienen ordenados, es seguridad extra)
+        const sortedChannels = channels.sort((a, b) => a.n - b.n);
+
+        const grid = document.getElementById('grid');
+        const searchInput = document.getElementById('searchInput');
+        const noResults = document.getElementById('noResults');
+        const filters = document.querySelectorAll('.filter-btn');
+
+        function render(data) {
+            grid.innerHTML = '';
+            if (data.length === 0) {
+                noResults.classList.remove('hidden');
+                return;
+            }
+            noResults.classList.add('hidden');
+
+            data.forEach(ch => {
+                const card = document.createElement('div');
+                card.className = "channel-card";
+                card.innerHTML = `
+                    <div class="channel-number">${ch.n}</div>
+                    <h3 class="channel-name">${ch.t}</h3>
+                    <div class="category-badge">${ch.c}</div>
+                `;
+                grid.appendChild(card);
+            });
+        }
+
+        // Buscador
+        searchInput.addEventListener('input', (e) => {
+            const val = e.target.value.toLowerCase();
+            const filtered = sortedChannels.filter(ch => 
+                ch.t.toLowerCase().includes(val) || 
+                ch.n.toString().includes(val)
+            );
+            render(filtered);
+            
+            // Reset visual de filtros
+            filters.forEach(btn => btn.classList.remove('active'));
+            if(val === '') filters[0].classList.add('active');
+        });
+
+        // Filtros
+        window.filter = (cat, btn) => {
+            searchInput.value = '';
+            filters.forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+
+            if (cat === 'Todos') {
+                render(sortedChannels);
+            } else {
+                render(sortedChannels.filter(ch => {
+                    // Mapeo simple de categorías
+                    if(cat === 'Variedades' && ch.c === 'Variedades') return true;
+                    if(cat === 'Estilo' && ch.c === 'Estilo') return true;
+                    if(cat === 'Cultura' && (ch.c === 'Cultura' || ch.c === 'Internacional')) return true;
+                    return ch.c === cat;
+                }));
+            }
+        };
+
+        window.resetSearch = () => {
+            searchInput.value = '';
+            filters[0].click();
+        };
+
+        // Inicio
+        render(sortedChannels);
+    </script>
+</body>
+</html>
+
+
